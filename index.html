@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herramienta Savanta Link Extractor</title>
+    <link rel="icon" type="image/png" href="https://cdn.dribbble.com/users/7549673/screenshots/17206704/media/1210a9d0ec8af427967e735935861eeb.png?resize=400x300&vertical=center" />
+    <style>
+        /* === CSS COMPLETO ACTUALIZADO CON FONDO DE CIELO SUAVE === */
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            /* Cambiado a un degradado suave de cielo */
+            background: linear-gradient(to bottom, #a8c0ff, #3f2b96); /* Un cielo azul claro */
+            color: #ddd;
+            overflow: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Estrellas más sutiles */
+            background: transparent url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==');
+            z-index: -1;
+            animation: stars 400s linear infinite; /* Animación más lenta */
+            opacity: 0.3; /* Estrellas más tenues */
+        }
+
+        .twinkling {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==');
+            z-index: -1;
+            animation: twinkling 400s linear infinite; /* Animación más lenta */
+            opacity: 0.2; /* Destellos más tenues */
+        }
+
+        @keyframes stars {
+            0% { background-position: 0 0; }
+            100% { background-position: -5000px 2500px; } /* Reducido el desplazamiento */
+        }
+
+        @keyframes twinkling {
+            0% { background-position: 0 0; }
+            100% { background-position: -5000px 2500px; } /* Reducido el desplazamiento */
+        }
+
+        .container {
+            background: rgba(30, 30, 30, 0.8); /* Ligeramente más transparente */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.08);
+            width: 550px;
+            max-width: 95%;
+            text-align: center;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        h1:hover {
+            color: #00ff88;
+        }
+
+        textarea {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            background-color: #222;
+            color: #eee;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #bbb;
+        }
+
+        button {
+            padding: 12px 25px;
+            background-color: #9e9e9e;
+            color: #111;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background-color: #757575;
+            transform: scale(1.05);
+        }
+
+        #resultados {
+            margin-top: 25px;
+            text-align: left;
+            overflow-wrap: break-word;
+        }
+
+        .sugerencia {
+            border: 1px solid #444;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            background-color: #222;
+            transition: all 0.3s ease;
+        }
+
+        .sugerencia:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
+        }
+
+        .sugerencia h3 {
+            margin-top: 0;
+            color: #ddd;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .sugerencia p {
+            margin-bottom: 8px;
+            color: #ddd;
+        }
+
+        .sugerencia strong {
+            color: #bbb;
+            font-weight: 600;
+        }
+
+        .copy-link {
+            color: #bbb;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            word-break: break-all;
+            cursor: pointer;
+            display: block;
+            padding: 5px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .copy-link.copiado {
+            color: #00ff88 !important;
+            font-weight: bold;
+        }
+
+        .copy-link.error {
+            color: #ff4444 !important;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #222;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #bbb;
+        }
+
+        .close-button:hover {
+            color: #ddd;
+        }
+
+        .linkpagina {
+            color: #00ff88;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .linkpagina:hover {
+            color: #00cc6a;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+
+    <div class="container">
+        <h1 id="linkTitle">Savanta ID Extractor</h1>
+        <textarea id="fullLinkInput" placeholder="Pega el enlace completo aquí..."></textarea>
+        <button id="extractButton">Extraer ID y Generar Link</button><br><br>
+        <div id="resultados"></div>
+    </div>
+
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModal">×</span>
+            <h2>Información</h2>
+            <p>Extractor de ID Savanta y generador de link<br><br>Basado en datos actualizados desde GitHub</p>
+            <h1 class="linkpagina" data-url="https://mi-pg.vercel.app/login/">UnevennesX</h1>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fullLinkInput = document.getElementById('fullLinkInput');
+            const extractButton = document.getElementById('extractButton');
+            const resultadosDiv = document.getElementById('resultados');
+             const linkTitle = document.getElementById('linkTitle');
+            const infoModal = document.getElementById('infoModal');
+            const closeModal = document.getElementById('closeModal');
+
+            function extractIDAndGenerateLink() {
+                const fullLink = fullLinkInput.value.trim();
+
+                if (!fullLink) {
+                    resultadosDiv.innerHTML = '<div class="sugerencia error">Ingresa un enlace válido</div>';
+                    return;
+                }
+
+                try {
+                    const url = new URL(fullLink);
+                    const idParam = url.searchParams.get('id');
+
+                    if (!idParam) {
+                        resultadosDiv.innerHTML = '<div class="sugerencia error">No se encontró el parámetro "id" en el enlace</div>';
+                        return;
+                    }
+
+                     // Extrae el ID del enlace anidado si es necesario
+                    let savantaID = null;
+                    try {
+                        const nestedURL = new URL(idParam);
+                        savantaID = nestedURL.searchParams.get('id');
+                    } catch (error) {
+                        // Si idParam no es una URL, asume que es el ID directamente
+                        savantaID = idParam;
+                    }
+
+                    if (!savantaID) {
+                        resultadosDiv.innerHTML = '<div class="sugerencia error">No se pudo extraer el ID de Savanta</div>';
+                        return;
+                    }
+
+                    const savantaLink = `https://sample.savanta.com/v2/c/?id=${savantaID}`;
+
+                    resultadosDiv.innerHTML = `
+                        <div class="sugerencia">
+                            <h3>ID Extraído:</h3>
+                            <p>${savantaID}</p>
+                            <h3>Link de Savanta Generado:</h3>
+                            <p>
+                                <span class="copy-link" data-link="${savantaLink}">
+                                    ${savantaLink}
+                                </span>
+                            </p>
+                        </div>
+                    `;
+
+                    // Configurar evento de copiado
+                    const elemento = resultadosDiv.querySelector('.copy-link');
+                    elemento.addEventListener('click', function() {
+                        copiarEnlace(this);
+                    });
+                    copiarEnlace(elemento); // Copiar automáticamente al generar
+                } catch (error) {
+                    resultadosDiv.innerHTML = `<div class="sugerencia error">Error al procesar el enlace: ${error}</div>`;
+                    console.error(error);
+                }
+            }
+
+              // Función de copiado mejorada
+             async function copiarEnlace(elemento) {
+                try {
+                    const link = elemento.getAttribute('data-link');
+                    if (!link) throw new Error('No hay enlace para copiar');
+
+                    // Usar un enfoque alternativo si navigator.clipboard no está disponible
+                    if (!navigator.clipboard) {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = link;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                    } else {
+                        await navigator.clipboard.writeText(link);
+                    }
+
+                    const originalText = elemento.textContent;
+                    elemento.textContent = '¡Copiado! ✓';
+                    elemento.classList.add('copiado');
+
+                    setTimeout(() => {
+                        elemento.textContent = originalText;
+                        elemento.classList.remove('copiado');
+                    }, 2000);
+
+                } catch (error) {
+                    elemento.textContent = 'Error al copiar';
+                    elemento.classList.add('error');
+                    console.error('Error al copiar:', error);
+                }
+            }
+
+            extractButton.addEventListener('click', extractIDAndGenerateLink);
+
+            // Control del modal
+            linkTitle.addEventListener('click', () => infoModal.style.display = 'block');
+            closeModal.addEventListener('click', () => infoModal.style.display = 'none');
+            window.addEventListener('click', (e) => {
+                if (e.target === infoModal) infoModal.style.display = 'none';
+            });
+
+            document.querySelector('.linkpagina').addEventListener('click', (e) => {
+                window.open(e.target.dataset.url, '_blank');
+                infoModal.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
